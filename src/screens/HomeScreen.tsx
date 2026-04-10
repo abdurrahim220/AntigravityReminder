@@ -1,4 +1,4 @@
-import { Button, StyleSheet, Text, View } from 'react-native'
+import { Button, Text, View } from 'react-native'
 import React from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../navigation/AppNavigator'
@@ -15,5 +15,3 @@ const HomeScreen = ({navigation}:HomeScreenProps) => {
 }
 
 export default HomeScreen
-
-const styles = StyleSheet.create({})
