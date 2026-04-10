@@ -1,8 +1,7 @@
 export interface Reminder {
   id: string;
   email: string;
-  lastUsedDate: Date;
-  nextReminderDate: Date;
+  createdAt: number;
 }
 
 

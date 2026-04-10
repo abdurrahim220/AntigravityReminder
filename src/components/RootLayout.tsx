@@ -5,6 +5,7 @@ import { useAppDispatch } from '../app/hooks'
 import { useEffect } from 'react'
 import { loadReminders } from '../storage/reminderStorage'
 import { setReminders } from '../features/reminder/reminderSlice'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 const RootLayout = () => {
   const dispatch = useAppDispatch()
@@ -17,9 +18,9 @@ const RootLayout = () => {
     loadData()
   },[dispatch])
   return (
-    <>
+    <SafeAreaProvider>
       <AppNavigator/>
-    </>
+    </SafeAreaProvider>
   )
 }
 
