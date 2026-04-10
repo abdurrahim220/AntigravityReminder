@@ -40,14 +40,15 @@ const AddReminderModal = ({ visible, onClose }: AddReminderModalProps) => {
       <View className="flex-1 justify-end bg-black/40">
         <View className="bg-white p-5 rounded-t-2xl">
           {/* Title */}
-          <Text className="text-lg font-bold mb-4">Add Reminder</Text>
+          <Text className="text-lg font-bold mb-4 text-gray-900">Add Reminder</Text>
 
           {/* Input */}
           <TextInput
             placeholder="Enter email"
             value={email}
             onChangeText={setEmail}
-            className="border border-gray-300 rounded-lg px-3 py-2 mb-4"
+            className="border border-gray-300 rounded-lg px-3 py-2 mb-4 text-gray-900"
+            autoFocus
           />
 
           {/* Buttons */}
@@ -57,16 +58,16 @@ const AddReminderModal = ({ visible, onClose }: AddReminderModalProps) => {
               onPress={onClose}
               className="px-4 py-2"
             >
-              <Text className="text-gray-500">Cancel</Text>
+              <Text className="text-gray-500 font-medium">Cancel</Text>
             </TouchableOpacity>
 
             {/* Save */}
             <TouchableOpacity
-              className="bg-blue-500 px-4 py-2 rounded-lg"
+              className="bg-blue-600 px-6 py-2 rounded-lg"
               onPress={handleSave}
               disabled={!email.trim()}
             >
-              <Text className="text-white font-semibold">Save</Text>
+              <Text className="text-white font-bold">Save</Text>
             </TouchableOpacity>
           </View>
         </View>
