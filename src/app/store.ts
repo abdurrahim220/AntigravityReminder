@@ -1,10 +1,10 @@
 
 import { configureStore } from '@reduxjs/toolkit'
-// ...
+import reminderReducer from "../features/reminder/reminderSlice"
 
 export const store = configureStore({
   reducer: {
-    
+    reminder:reminderReducer
   },
 })
 
