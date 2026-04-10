@@ -7,5 +7,5 @@ module.exports = withNativeWind(
   mergeConfig(defaultConfig, {
     // you can extend later if needed
   }),
-  { input: './src/styles/global.css' }
+  { input: './global.css' }
 );

@@ -22,9 +22,11 @@ apply plugin: "com.facebook.react.rootproject"
 
 allprojects {
     repositories {
+        // ... others like google(), mavenCentral()
+
         maven {
-            // All of React Native (JS, Obj-C, Swift, C++, Android binaries) is installed from npm
-            url("$rootDir/../node_modules/@react-native-async-storage/async-storage/android/local_repo")
+            url = uri(project(":react-native-async-storage_async-storage").file("local_repo"))
+            // or uri("path/to/node_modules/@react-native-async-storage/async-storage/android/local_repo")
         }
     }
 }

@@ -8,7 +8,7 @@ type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>
 const HomeScreen = ({navigation}:HomeScreenProps) => {
   return (
     <View>
-      <Text>HomeScreen</Text>
+      <Text className='text-red-600'>HomeScreen</Text>
       <Button title="Add Reminder" onPress={() => navigation.navigate('AddReminder')} />
     </View>
   )
