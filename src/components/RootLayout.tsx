@@ -1,11 +1,12 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+
+import AppNavigator from '../navigation/AppNavigator'
 
 const RootLayout = () => {
   return (
-    <View>
-      <Text>RootLayout</Text>
-    </View>
+    <>
+      <AppNavigator/>
+    </>
   )
 }
 
