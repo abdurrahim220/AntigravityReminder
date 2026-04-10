@@ -21,9 +21,12 @@ const reminderSlice = createSlice({
         updateReminder:(state,action:PayloadAction<Reminder>)=>{
             const updatedReminder = action.payload
             state.reminders = state.reminders.map((reminder)=>reminder.id === updatedReminder.id ? updatedReminder : reminder)
+        },
+        setReminders:(state,action:PayloadAction<Reminder[]>)=>{
+            state.reminders = action.payload
         }
     }
 })
 
-export const {addReminder,deleteReminder,updateReminder} = reminderSlice.actions
+export const {addReminder,deleteReminder,updateReminder,setReminders} = reminderSlice.actions
 export default reminderSlice.reducer
