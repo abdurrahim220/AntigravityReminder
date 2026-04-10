@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { deleteReminder } from '../features/reminder/reminderSlice';
 import { saveReminders } from '../storage/reminderStorage';
-import { ChevronLeftIcon, TrashIcon, EditIcon } from '../components/icons/ActionIcons';
+import {  TrashIcon, EditIcon } from '../components/icons/ActionIcons';
 import EditReminderModal from '../components/modals/EditReminderModal';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Details'>;
 
@@ -20,17 +21,17 @@ const DetailsScreen = ({ route, navigation }: Props) => {
 
   if (!reminder) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaProvider style={styles.safeArea}>
         <View style={styles.notFoundContainer}>
           <Text style={styles.notFoundText}>Reminder not found</Text>
-          <TouchableOpacity 
+          {/* <TouchableOpacity 
             style={styles.backButtonCenter}
             onPress={() => navigation.goBack()}
           >
             <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
-      </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
@@ -55,20 +56,11 @@ const DetailsScreen = ({ route, navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaProvider style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={styles.iconButton}
-        >
-          <ChevronLeftIcon size={24} color="#111827" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Task Details</Text>
-        <View style={styles.placeholder} />
-      </View>
+      
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Info Card */}
@@ -124,7 +116,7 @@ const DetailsScreen = ({ route, navigation }: Props) => {
         onClose={() => setEditModalVisible(false)}
         reminder={reminder}
       />
-    </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
@@ -136,7 +128,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
