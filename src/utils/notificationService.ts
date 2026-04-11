@@ -11,9 +11,14 @@ export const scheduleReminderNotification = async (reminder: Reminder) => {
       body: `${reminder.email} is now available`,
       android: {
         channelId: 'default',
-        pressAction: {
-          id: 'default',
+        actions: [
+        {
+          title: 'Mark as Used',
+          pressAction: {
+            id: 'mark-used',
+          },
         },
+      ],
       },
     },
     {
