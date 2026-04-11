@@ -3,8 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert, ScrollView 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { deleteReminder, toggleReminderStatus } from '../features/reminder/reminderSlice';
-import { saveReminders } from '../storage/reminderStorage';
+import { deleteReminderAndPersist, toggleReminderAndPersist } from '../features/reminder/reminderSlice';
 import {  TrashIcon, EditIcon } from '../components/icons/ActionIcons';
 import EditReminderModal from '../components/modals/EditReminderModal';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -39,10 +38,8 @@ const DetailsScreen = ({ route, navigation }: Props) => {
         { 
           text: 'Delete', 
           style: 'destructive',
-          onPress: async () => {
-            const updated = reminders.filter(r => r.id !== id);
-            dispatch(deleteReminder(id));
-            await saveReminders(updated);
+          onPress: () => {
+            dispatch(deleteReminderAndPersist(id));
             navigation.goBack();
           }
         },
@@ -50,20 +47,8 @@ const DetailsScreen = ({ route, navigation }: Props) => {
     );
   };
 
-  const handleToggleStatus = async () => {
-    dispatch(toggleReminderStatus(id));
-    // Also save to storage if we want persistence immediately
-    // Wait, toggleReminderStatus mutates Redux state. We need to save the entire reminders list after.
-    // To do it safely, we'll dispatch, then after state updates, trigger a save in a generic middleware or useEffect.
-    // For now we'll rely on the user leaving the app or we can manually save updated list.
-    const updatedReminder = {
-      ...reminder,
-      isUsed: !reminder.isUsed,
-      isAvailable: reminder.isUsed,
-      availableAt: !reminder.isUsed && reminder.resetDuration > 0 ? Date.now() + reminder.resetDuration : null
-    };
-    const updated = reminders.map(r => r.id === id ? updatedReminder : r);
-    await saveReminders(updated);
+  const handleToggleStatus = () => {
+    dispatch(toggleReminderAndPersist(id));
   };
 
   return (

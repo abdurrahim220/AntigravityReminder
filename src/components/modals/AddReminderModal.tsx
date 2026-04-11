@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, Alert, StyleSheet } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { addReminder } from '../../features/reminder/reminderSlice';
-import { saveReminders } from '../../storage/reminderStorage';
+import { useAppDispatch } from '../../app/hooks';
+import { addReminderAndPersist } from '../../features/reminder/reminderSlice';
 import { GrabHandle } from '../icons/ActionIcons';
 
 interface AddReminderModalProps {
@@ -21,7 +20,6 @@ const AddReminderModal = ({ visible, onClose }: AddReminderModalProps) => {
   const [email, setEmail] = useState('');
   const [resetDuration, setResetDuration] = useState<number>(0);
   const dispatch = useAppDispatch();
-  const reminders = useAppSelector(state => state.reminder.reminders);
 
   const handleSave = async () => {
     if (!email.trim()) return;
@@ -39,12 +37,10 @@ const AddReminderModal = ({ visible, onClose }: AddReminderModalProps) => {
       availableAt: null,
     };
 
-    dispatch(addReminder(newReminder));
-
-    const updated = [...reminders, newReminder];
-    await saveReminders(updated);
+    dispatch(addReminderAndPersist(newReminder));
 
     setEmail('');
+    setResetDuration(0);
     onClose();
   };
 

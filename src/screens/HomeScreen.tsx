@@ -3,8 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, Alert, StyleSheet, StatusBar } 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { deleteReminder, checkAutoResets } from '../features/reminder/reminderSlice';
-import { saveReminders } from '../storage/reminderStorage';
+import { deleteReminderAndPersist } from '../features/reminder/reminderSlice';
 import AddReminderModal from '../components/modals/AddReminderModal';
 import EditReminderModal from '../components/modals/EditReminderModal';
 import {  EditIcon, TrashIcon, PlusIcon } from '../components/icons/ActionIcons';
@@ -21,15 +20,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const dispatch = useAppDispatch();
   const reminders = useAppSelector(state => state.reminder.reminders);
 
-  React.useEffect(() => {
-    // Check auto resets when the component mounts or interval passes
-    dispatch(checkAutoResets());
-    const interval = setInterval(() => {
-      dispatch(checkAutoResets());
-    }, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, [dispatch]);
-
   const handleDelete = (id: string, email: string) => {
     Alert.alert(
       'Delete Reminder',
@@ -39,10 +29,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         { 
           text: 'Delete', 
           style: 'destructive',
-          onPress: async () => {
-            dispatch(deleteReminder(id));
-            const updated = reminders.filter(r => r.id !== id);
-            await saveReminders(updated);
+          onPress: () => {
+            dispatch(deleteReminderAndPersist(id));
           }
         },
       ]

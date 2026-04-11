@@ -1,5 +1,7 @@
 import { createSlice,PayloadAction } from "@reduxjs/toolkit";
 import { Reminder, ReminderState } from "./reminderTypes";
+import { AppDispatch, RootState } from "../../app/store";
+import { saveReminders } from "../../storage/reminderStorage";
 
 
 const initialState:ReminderState = {
@@ -55,6 +57,42 @@ const reminderSlice = createSlice({
         
     }
 })
+
+// === THUNKS ===
+export const addReminderAndPersist = (reminder: Reminder) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(reminderSlice.actions.addReminder(reminder));
+    const { reminders } = getState().reminder;
+    await saveReminders(reminders);
+};
+
+export const deleteReminderAndPersist = (id: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(reminderSlice.actions.deleteReminder(id));
+    const { reminders } = getState().reminder;
+    await saveReminders(reminders);
+};
+
+export const updateReminderAndPersist = (reminder: Reminder) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(reminderSlice.actions.updateReminder(reminder));
+    const { reminders } = getState().reminder;
+    await saveReminders(reminders);
+};
+
+export const toggleReminderAndPersist = (id: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(reminderSlice.actions.toggleReminderStatus(id));
+    const { reminders } = getState().reminder;
+    await saveReminders(reminders);
+};
+
+export const checkAutoResetsAndPersist = () => async (dispatch: AppDispatch, getState: () => RootState) => {
+    const beforeStr = JSON.stringify(getState().reminder.reminders);
+    dispatch(reminderSlice.actions.checkAutoResets());
+    const { reminders } = getState().reminder;
+    const afterStr = JSON.stringify(reminders);
+    
+    if (beforeStr !== afterStr) {
+        await saveReminders(reminders);
+    }
+};
 
 export const { addReminder, deleteReminder, updateReminder, setReminders, checkAutoResets, toggleReminderStatus } = reminderSlice.actions
 export default reminderSlice.reducer
