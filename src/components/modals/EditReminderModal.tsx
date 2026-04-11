@@ -12,14 +12,23 @@ interface EditReminderModalProps {
   reminder: Reminder | null;
 }
 
+const DURATION_OPTIONS = [
+  { label: 'One-time', value: 0 },
+  { label: '1 Day', value: 24 * 60 * 60 * 1000 },
+  { label: '7 Days', value: 7 * 24 * 60 * 60 * 1000 },
+  { label: '1 Month', value: 30 * 24 * 60 * 60 * 1000 },
+];
+
 const EditReminderModal = ({ visible, onClose, reminder }: EditReminderModalProps) => {
   const [email, setEmail] = useState('');
+  const [resetDuration, setResetDuration] = useState<number>(0);
   const dispatch = useAppDispatch();
   const reminders = useAppSelector(state => state.reminder.reminders);
 
   useEffect(() => {
     if (reminder) {
       setEmail(reminder.email);
+      setResetDuration(reminder.resetDuration || 0);
     }
   }, [reminder, visible]);
 
@@ -34,6 +43,7 @@ const EditReminderModal = ({ visible, onClose, reminder }: EditReminderModalProp
     const updatedReminder = {
       ...reminder,
       email: email.trim(),
+      resetDuration,
     };
 
     dispatch(updateReminder(updatedReminder));
@@ -68,15 +78,30 @@ const EditReminderModal = ({ visible, onClose, reminder }: EditReminderModalProp
               autoFocus
             />
 
+            <Text style={styles.label}>Reset Duration</Text>
+            <View style={styles.durationContainer}>
+              {DURATION_OPTIONS.map(option => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[styles.durationChip, resetDuration === option.value && styles.durationChipSelected]}
+                  onPress={() => setResetDuration(option.value)}
+                >
+                  <Text style={[styles.durationChipText, resetDuration === option.value && styles.durationChipTextSelected]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
             <View style={styles.buttonContainer}>
               <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={[styles.saveButton, (!email.trim() || email === reminder?.email) && styles.disabledButton]}
+                style={[styles.saveButton, (!email.trim()) && styles.disabledButton]}
                 onPress={handleUpdate}
-                disabled={!email.trim() || email === reminder?.email}
+                disabled={!email.trim()}
               >
                 <Text style={styles.saveButtonText}>Update Reminder</Text>
               </TouchableOpacity>
@@ -123,7 +148,40 @@ const styles = StyleSheet.create({
     color: '#111827',
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  durationContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 24,
+  },
+  durationChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  durationChipSelected: {
+    backgroundColor: '#EEF2FF',
+    borderColor: '#6366F1',
+  },
+  durationChipText: {
+    fontSize: 14,
+    color: '#4B5563',
+    fontWeight: '500',
+  },
+  durationChipTextSelected: {
+    color: '#4F46E5',
+    fontWeight: '600',
   },
   buttonContainer: {
     flexDirection: 'row',

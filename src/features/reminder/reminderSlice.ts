@@ -22,11 +22,39 @@ const reminderSlice = createSlice({
             const updatedReminder = action.payload
             state.reminders = state.reminders.map((reminder)=>reminder.id === updatedReminder.id ? updatedReminder : reminder)
         },
-        setReminders:(state,action:PayloadAction<Reminder[]>)=>{
-            state.reminders = action.payload
+        setReminders: (state, action: PayloadAction<Reminder[]>) => {
+            state.reminders = action.payload;
+        },
+        checkAutoResets: (state) => {
+            const now = Date.now();
+            state.reminders = state.reminders.map(reminder => {
+                if (reminder.isUsed && reminder.availableAt && now >= reminder.availableAt) {
+                    return { ...reminder, isUsed: false, isAvailable: true, availableAt: null };
+                }
+                return reminder;
+            });
+        },
+        toggleReminderStatus: (state, action: PayloadAction<string>) => {
+            const reminderId = action.payload;
+            state.reminders = state.reminders.map(reminder => {
+                if (reminder.id === reminderId) {
+                    if (!reminder.isUsed) {
+                        // Mark as used
+                        const availableAt = reminder.resetDuration > 0 
+                            ? Date.now() + reminder.resetDuration 
+                            : null;
+                        return { ...reminder, isUsed: true, isAvailable: false, availableAt };
+                    } else {
+                        // Mark as available manually
+                        return { ...reminder, isUsed: false, isAvailable: true, availableAt: null };
+                    }
+                }
+                return reminder;
+            });
         }
+        
     }
 })
 
-export const {addReminder,deleteReminder,updateReminder,setReminders} = reminderSlice.actions
+export const { addReminder, deleteReminder, updateReminder, setReminders, checkAutoResets, toggleReminderStatus } = reminderSlice.actions
 export default reminderSlice.reducer

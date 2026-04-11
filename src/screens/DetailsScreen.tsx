@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert, ScrollView 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { deleteReminder } from '../features/reminder/reminderSlice';
+import { deleteReminder, toggleReminderStatus } from '../features/reminder/reminderSlice';
 import { saveReminders } from '../storage/reminderStorage';
 import {  TrashIcon, EditIcon } from '../components/icons/ActionIcons';
 import EditReminderModal from '../components/modals/EditReminderModal';
@@ -24,12 +24,7 @@ const DetailsScreen = ({ route, navigation }: Props) => {
       <SafeAreaProvider style={styles.safeArea}>
         <View style={styles.notFoundContainer}>
           <Text style={styles.notFoundText}>Reminder not found</Text>
-          {/* <TouchableOpacity 
-            style={styles.backButtonCenter}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity> */}
+          
         </View>
       </SafeAreaProvider>
     );
@@ -53,6 +48,22 @@ const DetailsScreen = ({ route, navigation }: Props) => {
         },
       ]
     );
+  };
+
+  const handleToggleStatus = async () => {
+    dispatch(toggleReminderStatus(id));
+    // Also save to storage if we want persistence immediately
+    // Wait, toggleReminderStatus mutates Redux state. We need to save the entire reminders list after.
+    // To do it safely, we'll dispatch, then after state updates, trigger a save in a generic middleware or useEffect.
+    // For now we'll rely on the user leaving the app or we can manually save updated list.
+    const updatedReminder = {
+      ...reminder,
+      isUsed: !reminder.isUsed,
+      isAvailable: reminder.isUsed,
+      availableAt: !reminder.isUsed && reminder.resetDuration > 0 ? Date.now() + reminder.resetDuration : null
+    };
+    const updated = reminders.map(r => r.id === id ? updatedReminder : r);
+    await saveReminders(updated);
   };
 
   return (
@@ -89,10 +100,36 @@ const DetailsScreen = ({ route, navigation }: Props) => {
               })}
             </Text>
           </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.infoSection}>
+            <Text style={styles.label}>STATUS</Text>
+            <View style={styles.statusContainer}>
+              <View style={[styles.statusDot, reminder.isUsed ? styles.dotUsed : styles.dotAvailable]} />
+              <Text style={styles.statusText}>
+                {reminder.isUsed ? 'Used' : 'Available'}
+              </Text>
+            </View>
+            {reminder.isUsed && reminder.availableAt && (
+              <Text style={styles.availableAtText}>
+                Becomes available at: {new Date(reminder.availableAt).toLocaleDateString()} {new Date(reminder.availableAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+            )}
+          </View>
         </View>
 
         {/* Actions */}
         <View style={styles.actionContainer}>
+          <TouchableOpacity 
+            onPress={handleToggleStatus}
+            style={[styles.actionBtn, reminder.isUsed ? styles.markAvailableBtn : styles.markUsedBtn]}
+          >
+            <Text style={styles.actionBtnText}>
+              {reminder.isUsed ? 'Mark as Available' : 'Mark as Used'}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity 
             onPress={() => setEditModalVisible(true)}
             style={styles.editButton}
@@ -180,7 +217,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#F3F4F6',
-    marginVertical: 16,
+    marginVertical: 5,
   },
   dateText: {
     fontSize: 16,
@@ -194,6 +231,57 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     gap: 16,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  dotAvailable: {
+    backgroundColor: '#10B981', // green
+  },
+  dotUsed: {
+    backgroundColor: '#EF4444', // red
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  availableAtText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 6,
+    fontStyle: 'normal',
+  },
+  actionBtn: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  markUsedBtn: {
+    backgroundColor: '#EF4444',
+    shadowColor: '#EF4444',
+  },
+  markAvailableBtn: {
+    backgroundColor: '#10B981',
+    shadowColor: '#10B981',
+  },
+  actionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
   editButton: {
     flexDirection: 'row',

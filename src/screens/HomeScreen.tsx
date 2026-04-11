@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Alert, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Alert, StyleSheet, StatusBar } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { deleteReminder } from '../features/reminder/reminderSlice';
+import { deleteReminder, checkAutoResets } from '../features/reminder/reminderSlice';
 import { saveReminders } from '../storage/reminderStorage';
 import AddReminderModal from '../components/modals/AddReminderModal';
 import EditReminderModal from '../components/modals/EditReminderModal';
 import {  EditIcon, TrashIcon, PlusIcon } from '../components/icons/ActionIcons';
 import { Reminder } from '../features/reminder/reminderTypes';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -19,6 +20,15 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   
   const dispatch = useAppDispatch();
   const reminders = useAppSelector(state => state.reminder.reminders);
+
+  React.useEffect(() => {
+    // Check auto resets when the component mounts or interval passes
+    dispatch(checkAutoResets());
+    const interval = setInterval(() => {
+      dispatch(checkAutoResets());
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   const handleDelete = (id: string, email: string) => {
     Alert.alert(
@@ -45,7 +55,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaProvider style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       <View style={styles.container}>
         {/* Header */}
@@ -70,9 +80,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             >
               <View style={styles.cardContent}>
                 <View style={styles.cardInfo}>
-                  <Text style={styles.emailText} numberOfLines={1}>
-                    {item.email}
-                  </Text>
+                  <View style={styles.emailRow}>
+                    <View style={[styles.statusDot, item.isUsed ? styles.dotUsed : styles.dotAvailable]} />
+                    <Text style={styles.emailText} numberOfLines={1}>
+                      {item.email}
+                    </Text>
+                  </View>
                   <Text style={styles.dateText}>
                     {new Date(item.createdAt).toLocaleDateString(undefined, {
                       month: 'short',
@@ -136,7 +149,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           reminder={editingReminder}
         />
       </View>
-    </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
@@ -188,6 +201,22 @@ const styles = StyleSheet.create({
   cardInfo: {
     flex: 1,
     paddingRight: 12,
+  },
+  emailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  dotAvailable: {
+    backgroundColor: '#10B981', // green
+  },
+  dotUsed: {
+    backgroundColor: '#EF4444', // red
   },
   emailText: {
     fontSize: 17,
